@@ -2,15 +2,18 @@ import discord
 from discord.ext import commands
 import datetime
 
+"""Cog | Template
+
+This is a template put in place to be used
+when creating a new Cog file.
+
+NOTE: All commands are restricted to server use only by default,
+remove the `@commands.guild_only()` line before any command that
+should also be able to be used in a DM.
+"""
 class New(commands.Cog, name = "New"):
-    """Cog | Template
-
-    This is a template put in place to be used
-    when creating a new Cog file.
-
-    NOTE: All commands are restricted to server use only by default,
-    remove the `@commands.guild_only()` line before any command that
-    should also be able to be used in a DM.
+    """
+    This comment will show up in the help message, be careful.
     """
     def __init__(self, bot):
         self.bot = bot

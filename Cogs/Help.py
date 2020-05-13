@@ -31,13 +31,6 @@ class TheHelpCommand(commands.MinimalHelpCommand):
                         value = "{0.description}\nCommands:\n".format(cog) + ", ".join("`{1.qualified_name}`".format(self, command) for command in command_list),
                         inline = False
                     )
-        command_list = await self.filter_commands(mapping, sort = True)
-        if len(command_list) > 0:
-            embed.add_field(
-                name = "Other",
-                value = "Other Commands\nCommands:\n" + ", ".join("`{1.qualified_name}`".format(self, command) for command in command_list),
-                inline = False
-            )
         embed.set_footer(
             text = self.context.bot.footer,
             icon_url = self.context.bot.footer_image,

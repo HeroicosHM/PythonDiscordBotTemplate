@@ -21,6 +21,80 @@ class General(commands.Cog, name = "General"):
         print(f"{bot.OK} {bot.TIMELOG()} Loaded General Cog.")
 
     @commands.guild_only()
+    @commands.command(name = "prefix", help = "Changes the command prefix for the bot.", brief = "?")
+    async def prefix(self, ctx, prefix: str):
+        old = self.bot.prefix
+        self.bot.config['Prefix'] = prefix
+        with open('./Config.yml', 'w') as file:
+            self.bot.yaml.dump(self.bot.config, file)
+
+        self.bot.prefix = prefix
+        if self.bot.show_game_status:
+            game = discord.Game(name = self.bot.game_to_show.format(prefix = self.bot.prefix))
+            await self.bot.change_presence(activity = game)
+
+        embed = discord.Embed(
+            title = "Prefix Updated",
+            description = f"New Prefix: `{self.bot.prefix}`",
+            color = self.bot.embed_color,
+            timestamp = self.bot.embed_ts()
+        )
+        embed.add_field(
+            name = "New",
+            value = f"{self.bot.prefix}command"
+        )
+        embed.add_field(
+            name = "Old",
+            value = f"{old}command"
+        )
+        if self.bot.show_command_author:
+            embed.set_author(
+                name = ctx.author.name,
+                icon_url = ctx.author.avatar_url
+            )
+        embed.set_footer(
+            text = self.bot.footer,
+            icon_url = self.bot.footer_image
+        )
+        await ctx.send(embed = embed)
+        embed.set_author(
+            name = ctx.author.name,
+            icon_url = ctx.author.avatar_url
+        )
+        await self.bot.log_channel.send(embed = embed)
+
+    @commands.guild_only()
+    @commands.command(name = "restart", help = "Restarts the bot.", brief = "")
+    async def restart(self, ctx):
+        """Command | Restarts the bot.
+
+        Sends a message to the log channel, adds a reaction to the message, then
+        attempts to gracefully disconnect from Discord.
+
+        Either a Batch or Shell script (depending on operating system) will then
+        re-activate the bot, which allows the bot to take in file updates on the fly.
+        """
+
+        embed = discord.Embed(
+            title = self.bot.restarting_message.format(username = self.bot.user.name),
+            color = self.bot.embed_color,
+            timestamp = self.bot.embed_ts()
+        )
+        embed.set_footer(
+            text = self.bot.footer,
+            icon_url = self.bot.footer_image
+        )
+        if self.bot.show_command_author:
+            embed.set_author(
+                name = ctx.author.name,
+                icon_url = ctx.author.avatar_url
+            )
+        await self.bot.log_channel.send(embed = embed)
+
+        await ctx.message.add_reaction('✅')
+        await self.bot.close()
+
+    @commands.guild_only()
     @commands.command(name='uptime', help = 'Returns the amount of time the bot has been online.')
     async def uptime(self, ctx, test):
         """Command | Get Bot Uptime
