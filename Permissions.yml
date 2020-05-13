@@ -4,8 +4,8 @@
 # Name does not matter as long as it matches what is in the command permissions below.
 # ID must be a valid role ID.
 Roles:
-  Member: 493287727769583626
-  Admin: 421217554246402049
+  Member: 000000000000
+  Admin: 000000000000
 
 # Permissions for each command. Command 'name' field is the key.
 # If you have grouped commands, delimit group commands with a '-':

@@ -5,7 +5,7 @@ Token Env Var: Placeholder
 Prefix: '!'
 
 # The channel ID of the channel taht the bot will send messages to.
-Log Channel: 601811847590576152
+Log Channel: 000000
 
 # Sets the 'Playing' status of the bot.
 Game Status:
@@ -38,10 +38,10 @@ Embed Settings:
     Text: Placeholder Text
 
     # The url for the icon at the bottom of your footer image.
-    Icon URL: https://cdn.discordapp.com/attachments/601811859468976129/647500364223873047/tiger_release_final_20190919_013515.png
+    Icon URL: https://example.com/sample.png
 
 # The link for the server invite.
-Server Invite: https://discordapp.com/invite/arizonaesports
+Server Invite: https://discordapp.com/abcabc
 
 # The text for the online log message.
 # NOTE: Use '{username}' as a placeholder for the bot's username.
