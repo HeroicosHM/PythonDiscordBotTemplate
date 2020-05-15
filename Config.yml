@@ -7,6 +7,9 @@ Prefix: '!'
 # The channel ID of the channel taht the bot will send messages to.
 Log Channel: 000000
 
+# The ID of the user you want to be pinged by the Broken command.
+Broken User ID: 246669108752416768
+
 # Sets the 'Playing' status of the bot.
 Game Status:
   # 'true' will display 'Playing ___' (___ set below), 'false' won't display anything.

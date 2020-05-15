@@ -23,6 +23,9 @@ class General(commands.Cog, name = "General"):
     @commands.guild_only()
     @commands.command(name = "prefix", help = "Changes the command prefix for the bot.", brief = "?")
     async def prefix(self, ctx, prefix: str):
+        if self.bot.delete_commands:
+            await ctx.message.delete()
+
         old = self.bot.prefix
         self.bot.config['Prefix'] = prefix
         with open('./Config.yml', 'w') as file:
@@ -33,34 +36,17 @@ class General(commands.Cog, name = "General"):
             game = discord.Game(name = self.bot.game_to_show.format(prefix = self.bot.prefix))
             await self.bot.change_presence(activity = game)
 
-        embed = discord.Embed(
+        embed = self.bot.embed_util.get_embed(
             title = "Prefix Updated",
-            description = f"New Prefix: `{self.bot.prefix}`",
-            color = self.bot.embed_color,
-            timestamp = self.bot.embed_ts()
-        )
-        embed.add_field(
-            name = "New",
-            value = f"{self.bot.prefix}command"
-        )
-        embed.add_field(
-            name = "Old",
-            value = f"{old}command"
-        )
-        if self.bot.show_command_author:
-            embed.set_author(
-                name = ctx.author.name,
-                icon_url = ctx.author.avatar_url
-            )
-        embed.set_footer(
-            text = self.bot.footer,
-            icon_url = self.bot.footer_image
+            desc = f"New Prefix: `{self.bot.prefix}`",
+            fields = [
+                {"name": "New", "value": f"{self.bot.prefix}command", "inline": True},
+                {"name": "Old", "value": f"{old}command", "inline": True},
+            ],
+            author = ctx.author
         )
         await ctx.send(embed = embed)
-        embed.set_author(
-            name = ctx.author.name,
-            icon_url = ctx.author.avatar_url
-        )
+        embed = self.bot.embed_util.update_embed(embed, ts = True, author = ctx.author)
         await self.bot.log_channel.send(embed = embed)
 
     @commands.guild_only()
@@ -74,21 +60,11 @@ class General(commands.Cog, name = "General"):
         Either a Batch or Shell script (depending on operating system) will then
         re-activate the bot, which allows the bot to take in file updates on the fly.
         """
-
-        embed = discord.Embed(
+        embed = self.bot.embed_util.get_embed(
             title = self.bot.restarting_message.format(username = self.bot.user.name),
-            color = self.bot.embed_color,
-            timestamp = self.bot.embed_ts()
+            ts = True,
+            author = ctx.author
         )
-        embed.set_footer(
-            text = self.bot.footer,
-            icon_url = self.bot.footer_image
-        )
-        if self.bot.show_command_author:
-            embed.set_author(
-                name = ctx.author.name,
-                icon_url = ctx.author.avatar_url
-            )
         await self.bot.log_channel.send(embed = embed)
 
         await ctx.message.add_reaction('✅')
@@ -96,7 +72,7 @@ class General(commands.Cog, name = "General"):
 
     @commands.guild_only()
     @commands.command(name='uptime', help = 'Returns the amount of time the bot has been online.')
-    async def uptime(self, ctx, test):
+    async def uptime(self, ctx):
         """Command | Get Bot Uptime
 
         As the name implies... this returns the amount of time the
@@ -106,26 +82,17 @@ class General(commands.Cog, name = "General"):
         if self.bot.delete_commands:
             await ctx.message.delete()
 
-        seconds = trunc((datetime.datetime.now(datetime.timezone.utc) - self.bot.start_time).total_seconds())
+        seconds = trunc((self.bot.embed_ts() - self.bot.start_time).total_seconds())
         hours = trunc(seconds / 3600)
         seconds = trunc(seconds - (hours * 3600))
         minutes = trunc(seconds / 60)
         seconds = trunc(seconds - (minutes * 60))
 
-        embed = discord.Embed(
+        embed = self.bot.embed_util.get_embed(
             title = f":alarm_clock: {self.bot.user.name} Uptime",
-            description = f"{hours} Hours\n{minutes} Minutes\n{seconds} Seconds",
-            color = self.bot.embed_color,
-            timestamp = self.bot.embed_ts()
-        )
-        if self.bot.show_command_author:
-            embed.set_author(
-                name = ctx.author.name,
-                icon_url = ctx.author.avatar_url
-            )
-        embed.set_footer(
-            text = self.bot.footer,
-            icon_url = self.bot.footer_image
+            desc = f"{hours} Hours\n{minutes} Minutes\n{seconds} Seconds",
+            ts = True,
+            author = ctx.author
         )
         await ctx.send(embed = embed)
 
@@ -141,38 +108,19 @@ class General(commands.Cog, name = "General"):
         if self.bot.delete_commands:
             await ctx.message.delete()
 
-        embed = discord.Embed(
+        embed = self.bot.embed_util.get_embed(
             title = ":ping_pong: Pong!",
-            description = "Calculating ping time...",
-            color = self.bot.embed_color,
-        )
-        if self.bot.show_command_author:
-            embed.set_author(
-                name = ctx.author.name,
-                icon_url = ctx.author.avatar_url
-            )
-        embed.set_footer(
-            text = self.bot.footer,
-            icon_url = self.bot.footer_image
+            desc = "Calculating ping time...",
+            author = ctx.author
         )
         m = await ctx.send(embed = embed)
 
-        embed = discord.Embed(
-            title = ":ping_pong: Pong!",
-            description = "Message latency is {} ms\nDiscord API Latency is {} ms".format(
+        embed = self.bot.embed_util.update_embed(
+            embed = embed,
+            desc = "Message latency is {} ms\nDiscord API Latency is {} ms".format(
                 trunc((m.created_at - ctx.message.created_at).total_seconds() * 1000),
                 trunc(self.bot.latency * 1000)
-            ),
-            color = self.bot.embed_color
-        )
-        if self.bot.show_command_author:
-            embed.set_author(
-                name = ctx.author.name,
-                icon_url = ctx.author.avatar_url
             )
-        embed.set_footer(
-            text = self.bot.footer,
-            icon_url = self.bot.footer_image
         )
         await m.edit(embed = embed)
 
@@ -186,19 +134,10 @@ class General(commands.Cog, name = "General"):
         if self.bot.delete_commands:
             await ctx.message.delete()
 
-        embed = discord.Embed(
+        embed = self.bot.embed_util.get_embed(
             title = "Invite Link",
-            description = f"{self.bot.invite_link}",
-            color = self.bot.embed_color
-        )
-        if self.bot.show_command_author:
-            embed.set_author(
-                name = ctx.author.name,
-                icon_url = ctx.author.avatar_url
-            )
-        embed.set_footer(
-            text = self.bot.footer,
-            icon_url = self.bot.footer_image
+            desc = f"{self.bot.invite_link}",
+            author = ctx.author
         )
         await ctx.send(embed = embed)
 
