@@ -1,40 +1,63 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import datetime
 
-"""Class | Custom Help Command
+"""Help Command Paginator
+
+This class is used to create a paginated help command.
+"""
+class HelpSource(menus.ListPageSource):
+    def __init__(self, ctx, fields, per_page = 2):
+        self.ctx = ctx
+        self.num_fields = int(len(fields) / per_page)
+        if len(fields) % per_page:
+            self.num_fields += 1
+        super().__init__(fields, per_page = per_page)
+
+    async def format_page(self, menu, entries):
+        offset = menu.current_page * self.per_page
+
+        embed = self.ctx.bot.embed_util.get_embed(
+            title = "\N{NEWSPAPER} Help Menu",
+            desc = f"A listing of all available commands sorted by grouping.\nTo learn more about specific commands, use `{self.ctx.bot.prefix}help <command>`",
+            fields = [field for i, field in enumerate(entries, start = offset)],
+            footer = f"{self.ctx.bot.footer} | [{menu.current_page + 1}/{self.num_fields}]"
+        )
+        return embed
+
+"""Custom Help Command
 
 Contains all of the features for a custom help message depending on certain
 values set when defining a command in the first place.
+
+NOTE: Users who use the help command can only see commands that they are actually allowed to use in permissions.
+Similarly, any commands that have `hidden=True` in their decorator are hidden.
 """
 class TheHelpCommand(commands.MinimalHelpCommand):
     async def send_bot_help(self, mapping):
-        """Help | General Bot
+        """Send a help list for all of the bot commands.
 
-        Send a help list for all of the bot commands.
-
-        NOTE: Will be paginated at a later date.
+        Is now using pagination as well.
         """
         fields = []
+        # Parsing through all cogs and all commands contained within each command.
         for cog in mapping.keys():
             if cog:
                 command_list = await self.filter_commands(mapping[cog], sort = True)
                 if len(command_list) > 0:
+                    # If a cog contains visible commands, add the to an embed field.
                     fields.append({
                         "name": cog.qualified_name,
                         "value": f"{cog.description}\nCommands:\n" + ", ".join(f"`{command}`" for command in command_list),
                         "inline": False
                     })
-        embed = self.context.bot.embed_util.get_embed(
-            title = "Command Help",
-            desc = f"A listing of all available commands sorted by grouping.\nTo learn more about specific commands, use `{self.clean_prefix}help <command>`",
-            fields = fields,
-            author = self.context.message.author
-        )
-        await self.get_destination().send(embed = embed)
+
+        # Create the paginated help menu
+        pages = menus.MenuPages(source = HelpSource(self.context, fields), delete_message_after = True)
+        await pages.start(self.context)
 
     async def send_cog_help(self, cog):
-        """Help | Cog Specific
+        """Cog Specific
 
         Sends help for all commands contained within a cog, by
         cog name.
@@ -52,7 +75,7 @@ class TheHelpCommand(commands.MinimalHelpCommand):
         await self.get_destination().send(embed = embed)
 
     async def send_group_help(self, group):
-        """Help | Grouped Commands
+        """Grouped Commands
 
         Sends help message for all commands grouped in a parent command.
         """
@@ -62,7 +85,7 @@ class TheHelpCommand(commands.MinimalHelpCommand):
         for command in command_list:
             if "`" + command.qualified_name + " " + command.signature + "` - {}".format(command.help) not in command_activation and not command.hidden:
                 command_activation.append("`" + command.qualified_name + " " + command.signature + "` - {}".format(command.help))
-                if command.brief:
+                if command.brief not in [None, ""]:
                     command_example.append("`" + self.clean_prefix + command.qualified_name + " " + command.brief + "`")
                 else:
                     command_example.append("`" + self.clean_prefix + command.qualified_name + "`")
@@ -94,7 +117,7 @@ class TheHelpCommand(commands.MinimalHelpCommand):
         await self.get_destination().send(embed = embed)
 
     async def send_command_help(self, command):
-        """Help | Command Specific
+        """Command Specific
 
         Send help for a specific given single command.
         """
@@ -107,21 +130,15 @@ class TheHelpCommand(commands.MinimalHelpCommand):
             })
         fields.append({
             "name": "Usage",
-            "value": "`" + self.clean_prefix + command.qualified_name + " " + command.signature + "`",
+            "value": f"`{self.clean_prefix}{command.qualified_name}{' ' + command.signature if command.signature else ''}`",
             "inline": False
         })
-        if command.brief:
-            fields.append({
-                "name": "Example",
-                "value": "`" + self.clean_prefix + command.qualified_name + " " + command.brief + "`",
-                "inline": False
-            })
-        else:
-            fields.append({
-                "name": "Example",
-                "value": "`" + self.clean_prefix + command.qualified_name + "`",
-                "inline": False
-            })
+        fields.append({
+            "name": "Example",
+            "value": f"`{self.clean_prefix}{command.qualified_name}{' ' + command.brief if command.brief else ''}`",
+            "inline": False
+        })
+
         embed = self.context.bot.embed_util.get_embed(
             title = f"'{command.name.capitalize()}' Help",
             desc = f"{command.help}",
@@ -130,13 +147,13 @@ class TheHelpCommand(commands.MinimalHelpCommand):
         )
         await self.get_destination().send(embed = embed)
 
-"""Cog | Class Loader
+"""Class Loader
 
 Loads the custom help command class above.
 """
 class LoadHelp(commands.Cog, name = "Help"):
     """
-    Lists all available commands, sorted by the Cog they are in.
+    The actual discord cog that is loaded when this file is added, simply wrapping the help command.
     """
     def __init__(self, bot):
         self._original_help_command = bot.help_command

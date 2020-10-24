@@ -2,10 +2,11 @@ import discord
 from discord.ext import commands
 import datetime
 
-"""Cog | Error Handler
+"""Error Handler
 
-This cog handles all errors for the bot, preventing
-the runtime from crashing or forcing bot exit.
+This cog is a custom error handler for the bot, preventing
+the runtime from crashing or forcing bot exit on internal errors.
+(syntax or logic errors can still crash the bot)
 
 NOTE: All commands are restricted to server use only by default,
 remove the `@commands.guild_only()` line before any command that
@@ -22,7 +23,7 @@ class Errors(commands.Cog, name = "Error Handling"):
     @commands.guild_only()
     @commands.command(name = "broken", aliases = ['borked'], help = "Used to report when the bot has stopped working.", brief = "")
     async def err_report(self, ctx):
-        """Command | Report Broken Bot
+        """Report Broken Bot
 
         This command is used to report when the bot is broken or stopped working,
         it prints some useful information to the console and attempts to
@@ -43,7 +44,7 @@ class Errors(commands.Cog, name = "Error Handling"):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        """Listener | Command Error Handler
+        """Command Error Handler
 
         Take in command specific errors and return response to user
         based on error.
@@ -141,19 +142,22 @@ class Errors(commands.Cog, name = "Error Handling"):
             )
             await self.bot.log_channel.send(embed = embed)
 
-            await self.err_report(ctx)
             self.print_log(type = self.bot.ERR, message = error)
 
     @commands.Cog.listener()
     async def on_error(self, error):
-        """Listener | Global Error Handler
+        """Global Error Handler
 
-        The generalized handler for all errors taht happen in the bot,
+        The generalized handler for all errors that happen in the bot,
         preventing suspension of runtime should something go wrong.
         """
         self.print_log(type = self.bot.ERR, message = error)
 
     def print_log(self, type, message, err = None, ctx = None):
+        """Printing Error Logs
+
+        Prints information about an error to the console/terminal.
+        """
         print(f"{type} {self.bot.TIMELOG()} {message}:")
         if err:
             print(f"{' ' * 35} Error: {err}")

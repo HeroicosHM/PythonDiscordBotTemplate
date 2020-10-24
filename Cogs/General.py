@@ -1,12 +1,12 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import datetime
 from math import trunc
 
-"""Cog | General Commands
+"""General Commands
 
 This Cog contains a list of commands that almost every program
-should utilize.
+utilizes.
 
 NOTE: All commands are restricted to server use only by default,
 remove the `@commands.guild_only()` line before any command that
@@ -21,59 +21,9 @@ class General(commands.Cog, name = "General"):
         print(f"{bot.OK} {bot.TIMELOG()} Loaded General Cog.")
 
     @commands.guild_only()
-    @commands.command(name = "prefix", help = "Changes the command prefix for the bot.", brief = "?")
-    async def prefix(self, ctx, prefix: str):
-        if self.bot.delete_commands:
-            await ctx.message.delete()
-
-        old = self.bot.prefix
-        self.bot.config['Prefix'] = prefix
-        with open('./Config.yml', 'w') as file:
-            self.bot.yaml.dump(self.bot.config, file)
-
-        self.bot.prefix = prefix
-        if self.bot.show_game_status:
-            game = discord.Game(name = self.bot.game_to_show.format(prefix = self.bot.prefix))
-            await self.bot.change_presence(activity = game)
-
-        embed = self.bot.embed_util.get_embed(
-            title = "Prefix Updated",
-            desc = f"New Prefix: `{self.bot.prefix}`",
-            fields = [
-                {"name": "New", "value": f"{self.bot.prefix}command", "inline": True},
-                {"name": "Old", "value": f"{old}command", "inline": True},
-            ],
-            author = ctx.author
-        )
-        await ctx.send(embed = embed)
-        embed = self.bot.embed_util.update_embed(embed, ts = True, author = ctx.author)
-        await self.bot.log_channel.send(embed = embed)
-
-    @commands.guild_only()
-    @commands.command(name = "restart", help = "Restarts the bot.", brief = "")
-    async def restart(self, ctx):
-        """Command | Restarts the bot.
-
-        Sends a message to the log channel, adds a reaction to the message, then
-        attempts to gracefully disconnect from Discord.
-
-        Either a Batch or Shell script (depending on operating system) will then
-        re-activate the bot, which allows the bot to take in file updates on the fly.
-        """
-        embed = self.bot.embed_util.get_embed(
-            title = self.bot.restarting_message.format(username = self.bot.user.name),
-            ts = True,
-            author = ctx.author
-        )
-        await self.bot.log_channel.send(embed = embed)
-
-        await ctx.message.add_reaction('✅')
-        await self.bot.close()
-
-    @commands.guild_only()
     @commands.command(name='uptime', help = 'Returns the amount of time the bot has been online.')
     async def uptime(self, ctx):
-        """Command | Get Bot Uptime
+        """Get Bot Uptime
 
         As the name implies... this returns the amount of time the
         bot has been online, given that the `bot.start_time` value
@@ -82,6 +32,7 @@ class General(commands.Cog, name = "General"):
         if self.bot.delete_commands:
             await ctx.message.delete()
 
+        # Some basic calculations to determine individual time amounts
         seconds = trunc((self.bot.embed_ts() - self.bot.start_time).total_seconds())
         hours = trunc(seconds / 3600)
         seconds = trunc(seconds - (hours * 3600))
@@ -99,7 +50,7 @@ class General(commands.Cog, name = "General"):
     @commands.guild_only()
     @commands.command(name='ping', aliases=['pong'], help = 'Gets the current latency of the bot.')
     async def ping(self, ctx):
-        """Command | Get Bot Ping
+        """Get Bot Ping
 
         Returns two values, the ping of the Discord bot to the API,
         and the ping time it takes from when the original message is sent
@@ -124,22 +75,32 @@ class General(commands.Cog, name = "General"):
         )
         await m.edit(embed = embed)
 
+    """DISABLED - this command really didn't see much use or value, so I am just leaving it out for now.
     @commands.guild_only()
     @commands.command(name='invite', help = 'Returns the server invite link.', brief = "")
     async def invite(self, ctx):
-        """Command | Get Server Invite
+        ""Command | Get Server Invite
 
-        Returns a static invite link which is set in the Config.yml file.
-        """
+        Returns an invite to the server. Disabled by default,
+        this is enabled if the server the bot is used in is meant to be public.
+        ""
         if self.bot.delete_commands:
             await ctx.message.delete()
 
+        print(ctx.guild.features)
+        if 'VANITY_URL' in ctx.guild.features:
+            invite = await ctx.guild.vanity_invite()
+        else:
+            invite = await ctx.guild.create_invite(unique = False)
+
+
         embed = self.bot.embed_util.get_embed(
             title = "Invite Link",
-            desc = f"{self.bot.invite_link}",
+            desc = invite.url,
             author = ctx.author
         )
         await ctx.send(embed = embed)
+    """
 
 def setup(bot):
     """Setup

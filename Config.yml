@@ -2,13 +2,17 @@
 Token Env Var: Placeholder
 
 # Command prefix for all commands.
-Prefix: '!'
+Prefix: '-'
 
-# The channel ID of the channel taht the bot will send messages to.
-Log Channel: 000000
+# The channel ID of the channel that the bot will send messages to.
+Log Channel: 000000000000000000000
 
-# The ID of the user you want to be pinged by the Broken command.
+# The ID of the user you want to be pinged by the broken command.
+# Is set to Hero's discord ID by default
 Broken User ID: 246669108752416768
+
+# Whether to have the custom error logging active
+DEBUG: true
 
 # Sets the 'Playing' status of the bot.
 Game Status:
@@ -38,13 +42,10 @@ Embed Settings:
 
   Footer:
     # The text for the footer of the messages.
-    Text: Placeholder Text
+    Text: Hero's Bot Testing
 
     # The url for the icon at the bottom of your footer image.
-    Icon URL: https://example.com/sample.png
-
-# The link for the server invite.
-Server Invite: https://discordapp.com/abcabc
+    Icon URL: https://cdn.discordapp.com/avatars/246669108752416768/f4d2061acc47171fbd231991839e7578.png
 
 # The text for the online log message.
 # NOTE: Use '{username}' as a placeholder for the bot's username.

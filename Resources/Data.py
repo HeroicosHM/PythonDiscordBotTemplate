@@ -21,13 +21,14 @@ class DataManager:
         See 'Config.yml' for specifics on each setting.
         """
         with open("./Config.yml", 'r') as file:
-            config = self.bot.yaml.load(file)
+            config = self.bot.yaml.load(file, Loader = self.bot.yaml.Loader)
 
         # Save config files to the bot.
         self.bot.config = config
 
         # Main Settings
         self.bot.TOKEN               = os.getenv(config['Token Env Var'])
+        self.bot.DEBUG               = config['DEBUG']
         self.bot.prefix              = config['Prefix']
         self.bot.online_message      = config['Online Message']
         self.bot.restarting_message  = config['Restarting Message']
@@ -36,7 +37,6 @@ class DataManager:
         self.bot.game_to_show        = config['Game Status']['Game']
         self.bot.log_channel_id      = config['Log Channel']
         self.bot.broken_user_id      = config['Broken User ID']
-        self.bot.invite_link         = config['Server Invite']
 
         # Embed Options
         self.bot.embed_color = Color.from_rgb(
@@ -65,7 +65,7 @@ class DataManager:
         """
         bot_permissions = {}
         with open("./Permissions.yml", 'r') as file:
-            permissions = self.bot.yaml.load(file)
+            permissions = self.bot.yaml.load(file, Loader = self.bot.yaml.Loader)
             # Raw permission input is formatted to have role IDs in place.
             roles = dict(permissions['Roles'])
             for key in permissions.keys():

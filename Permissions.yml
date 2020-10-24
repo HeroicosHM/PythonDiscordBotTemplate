@@ -9,6 +9,7 @@ Roles:
 
 # Permissions for each command. Command 'name' field is the key.
 # If you have grouped commands, delimit group commands with a '-':
+# if a command is not included in this file, it will be assumed that anyone can use it
 # example:
 #   - "{Member}"
 # example-command:
@@ -17,4 +18,12 @@ Roles:
 prefix:
   - "{Admin}"
 restart:
+  - "{Admin}"
+cog:
+  - "{Admin}"
+cog-load:
+  - "{Admin}"
+cog-unload:
+  - "{Admin}"
+cog-reload:
   - "{Admin}"

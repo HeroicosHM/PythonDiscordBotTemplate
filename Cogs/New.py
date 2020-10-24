@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import datetime
 
-"""Cog | Template
+"""Template
 
 This is a template put in place to be used
 when creating a new Cog file.
@@ -22,7 +22,7 @@ class New(commands.Cog, name = "New"):
     @commands.guild_only()
     @commands.command(name = "SAMPLE", help = "Just a placeholder.", brief = "If parameters then examples here")
     async def sample(self, ctx):
-        """Command | Sample
+        """Sample
 
         This is a template for a standard command.
         """
@@ -30,7 +30,7 @@ class New(commands.Cog, name = "New"):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        """Listener | Sample
+        """Sample
 
         This is a template for a standard message listener.
         """
